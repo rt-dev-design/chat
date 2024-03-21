@@ -41,6 +41,7 @@
         // 用户在message页 <=>  userIsCurrentlyOnPage === "message"
 
         messagePageChatId: "chatId",
+        // 值为-1时表示无效
         messages: [],
         // 按时序的某个聊天的消息
         // 有append方法，用于追加一段近期聊天
@@ -116,7 +117,7 @@
     - http网关接收到消息，转发给聊天服务
     - 聊天服务查询并返回该用户是否有未读消息
   
-      ```json
+      ```javasript
       {
           true / false
       }
@@ -155,11 +156,11 @@
   - 前端发http请求向后端分页请求这个用户的聊天视图，代替全局数据的chats数组
   - 将tabbarLabel置为false
   
-    ```json
+    ```javascript
     [
         {
             ...chat,
-            thereAreNewMessages: true / false
+            thereAreNewMessages: true
         },
         ...
     ]
@@ -169,10 +170,38 @@
 
 ---
 
-- 初次加载和之后每次显示聊天页面，先设置enableStompMessageAppending为false，请求聊天数据，渲染页面，然后再设置enableStompMessageAppending为true
+- 初次加载和之后每次显示聊天页面
+  - 通过一个数据模块的方法请求新的聊天数据
+  设置enableStompMessageAppending为false，请求聊天数据，渲染页面，处理Stomp消息缓冲区，再设置enableStompMessageAppending为true
+  - 然后（then）更新用户在这个聊天中的最后活动时间
+    向后端发送
+
+    ```json
+    {
+      "userId": "userId",
+      "chatId": "chatId"
+    }
+    ```
+
+    后端一般是以一个一般的更新类DTO对象来接收，然后查询聊天室并更新时间戳
 - 每次退出或者隐藏页面时，更新userIsCurrentlyOnPage为others，清除chatId
 
-发送消息时，向/app/chat发送Stomp消息
+- 每次用户发送聊天消息时
+  - 前端向/app/chat发送Stomp消息，然后将消息直接appendFromStomp到message的末尾
+  - 发送的Stomp消息体的具体格式为
+
+    ```javascript
+    {
+      id: -1,
+      type: "text",
+      content: "content",
+      senderId: "1234",
+      chatId: "2134",
+      recieverId: "1234"
+    }
+    ```
+
+  - Stomp网关接收到消息，直接转发到转发服务
 消息转发服务查询连接会话
 若不在线则不转发，否则立刻转发
 同时，
