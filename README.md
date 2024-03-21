@@ -7,6 +7,13 @@
 - 云端永久保存聊天记录
 - 图片和文件共享
 
+## 数据库模式设计
+
+- 关系数据库的实体集和关系集模式
+  ![关系数据库实体集关系集模式](doc/img/rdb_schema.jpg)
+- Redis用户连接数据模式
+  ![Redis用户连接数据模式](doc/img/redis_usersession.jpg)
+
 ## 服务集群中的各个源码项目
 
 - chat-commons：数据原型和相关工具，即entity, dto, vo, enum, util
@@ -60,8 +67,11 @@
         // 用户按最后新消息时间倒序排的一页聊天
 
         tabbarLabel: "true",
-        // 这个应该是某个与chats有关的计算属性
-        // 也可能还需要一个可以直接设置的属性，再复合计算属性
+        // 这个是一个可以直接设置的属性
+        // tabbar是否提示新消息，还需要结合chats的复合计算属性
+        // 两者优先级和一些限制如下：
+        // tabbarDisplaysNotReadLabel = tabbarLabel ? tabbarLabel : computedFromChats
+        // 且每次chats刷新时，会将tabbarLabel置为false
     }
     ```
 
@@ -84,7 +94,7 @@
       }
       ```
 
-    - 网关接收到消息，取出自身的ip和port，调用连接服务的setOnline，连接服务为用户创建或更新连接，并修改状态为上线
+    - 网关接收到消息，取出自身的ip和port，调用连接服务的setOnline，传入以下对象到连接服务为用户创建或更新连接，并修改用户状态为上线
 
       ```json
       {
@@ -143,6 +153,7 @@
 - 初次加载和之后每次显示chat页面，以及下拉刷新该页面时
   - 更新userIsCurrentlyOnPage为chat
   - 前端发http请求向后端分页请求这个用户的聊天视图，代替全局数据的chats数组
+  - 将tabbarLabel置为false
   
     ```json
     [
