@@ -96,9 +96,9 @@
 
 ---
 
-- 应用启动时且在用户登录后，前端发起请求，与某个Stomp网关的/ws端点建立Stomp连接，接下来是建立连接后立刻做什么，onConnect
+- 应用启动且在用户登录后，前端发起请求到某个Stomp网关的/ws端点，与网关建立Stomp连接。以下是建立连接后立刻做什么，类似于onConnect回调：
   - 连接建立时
-    - 前端发送以下消息到/app/user-connect端点
+    - 前端发送以下消息到/app/user-connect端点，这里后端直接用一个Long来接收
   
       ```json
       {
@@ -106,7 +106,7 @@
       }
       ```
 
-    - 网关接收到消息，取出自身的ip和port，调用连接服务的setOnline，传入以下对象到连接服务为用户创建或更新连接，并修改用户状态为上线
+    - 网关接收到消息，取出自身的ip和port，远程调用连接服务的setOnline，传入包含以下信息的UserStompConnection对象到连接服务为用户创建或更新连接，并修改用户状态为上线，用户现在就算在线
 
       ```json
       {
@@ -117,7 +117,7 @@
       ```
 
   - 连接建立时
-    - GET自用户上一次离线之后的是否有未读消息
+    - 请求HTTP网关GET自用户上一次离线之后，是否有未读消息
 
       ```json
       {
@@ -125,8 +125,10 @@
       }
       ```
 
-    - http网关接收到消息，转发给聊天服务
-    - 聊天服务查询并返回该用户是否有未读消息
+    - http网关接收到消息，转发给聊天服务做查询
+    - 聊天服务查询：
+      查询该用户的所有用户聊天，对比用户最后活跃时间和聊天的最新消息时间，若有任何一个活跃小于最新，则是true，否则false
+    - 返回该用户是否有未读消息
   
       ```javasript
       {
@@ -135,34 +137,39 @@
       ```
 
     - 如果有新消息，前端依据用户在哪个页面更新UI
-      - 若在others, 则更新tabbar
+      - 若在others, 则**直接**更新tabbar徽标
       - 若在chat，则刷新chat
-      - 若用户在message
+      - 若用户在message（？？？）
         - 若该message的chatId无新消息，则不更新
         - 否则，刷新message
   - 连接建立时，前端订阅网关的/user/${username}/queue/message端点，并传入onMessage回调，准备实时接受消息
 
 ---
 
-- 当前端从/user/${username}/queue/message端点收到消息，onMessage
-  - 消息形式为
+- 当前端从/user/${username}/queue/message端点收到消息，onMessage所做的事：
+  - 后端的消息形式为如下，其中chatId可能不存在，因为一个对话的史上第一条消息是直接从消息服务转发过来的，而消息服务从前端拿到的消息不会有chatId，还没创建
   
     ```javascript
     {
-        message: {...} (其中有chatId)
+        id: 123,
+        type: "text",
+        content: "消息内容"，
+        senderId: 123,
+        recieverId: 123,
+        chatId: 123
     }
     ```
 
   - 前端根据用户在哪个页面进行界面更新
-    - 若用户在others，则更新tabbar，提示有新消息
-    - 若用户在chat，则直接刷新chat（可以优化）
+    - 若用户在others，则**直接**更新tabbar，提示有新消息
+    - 若用户在chat，则直接刷新chat，此时无论是新的对话还是老的对话，都会被刷出来，chatId也会有
     - 若用户在message
-      - 若该message的chatId和新消息chatId不匹配，更新tabbar
+      - 若该message的chatId和新消息chatId不匹配，**直接**更新tabbar（这里只需要看chatId，因为如果发来的消息chatId不存在，那用户不可能在对应的message）
       - 否则，立刻更新到message的界面上，即通过appendFromStomp方法添加到messages数组的最后面
 
 ---
 
-- 初次加载和之后每次显示chat页面，以及下拉刷新该页面时
+- 初次加载和**之后每次显示**chat页面，以及下拉刷新该页面时
   - 更新userIsCurrentlyOnPage为chat
   - 前端发http请求向后端分页请求这个用户的聊天视图，代替全局数据的chats数组
   - 将tabbarLabel置为false
@@ -198,25 +205,24 @@
 - 每次退出或者隐藏页面时，更新userIsCurrentlyOnPage为others，清除chatId
 
 - 每次用户发送聊天消息时
-  - 前端向/app/chat发送Stomp消息，然后将消息直接appendFromStomp到message的末尾
-  - 发送的Stomp消息体的具体格式为
+  - 前端向/app/chat发送Stomp消息，然后将消息直接appendFromStomp到messages的末尾
+  - 发送的Stomp消息体的具体格式为如下，其中，senderId和recieverId必填，chatId为选填
 
     ```javascript
     {
-      id: -1,
-      type: "text",
-      content: "content",
-      senderId: "1234",
-      chatId: "2134",
-      recieverId: "1234"
+        id: 123,
+        type: "text",
+        content: "消息内容"，
+        senderId: 123,
+        recieverId: 123,
+        chatId: 123
     }
     ```
 
   - Stomp网关接收到消息，直接转发到转发服务
 消息转发服务查询连接会话
 若不在线则不转发，否则立刻转发
-同时，
-调用消息服务、对话服务、中转服务进行存储
+同时调用消息服务、对话服务进行存储，注意更新一些活跃时间
 
 ---
 
