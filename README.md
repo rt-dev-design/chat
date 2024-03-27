@@ -12,8 +12,8 @@
 - 关系数据库的实体集和关系集模式
   ![关系数据库实体集关系集模式](doc/img/rdb_schema.jpg)
   - User的表、实体类和相关数据类以及业务代码，在主模块已经都有了，在这里先简写一下，只写id
-  - 关于Chat实体和关系的说明：
-    lastMessageTime是该对话最近最新的一条消息的创建时间，每次发消息都要更新一下
+  - 关于Chat实体和关系的说明：&nbsp;
+    lastMessageTime是该对话最近最新的一条消息的创建时间，每次有新消息都要更新一下&nbsp;
     最终的Chat表会有UserxId和UseryId，以及相对应的UserxLastPresentTime和UseryLastPresentTime
   - 关于Message实体和关系的说明：
     type目前拟定有text，image和file，text类型对应的content为消息的文本内容，后两者对应的content为文件的url
@@ -52,6 +52,14 @@
         // 用户在message页 <=>  userIsCurrentlyOnPage === "message"
 
         messagePageChatId: "chatId",
+        msg: {
+          id: 123,
+          type: "text",
+          content: "消息内容"，
+          senderId: 123,
+          recieverId: 123,
+          chatId: 123
+        }
         // 值为-1时表示无效
         messages: [],
         // 按时序的某个聊天的消息
@@ -106,7 +114,7 @@
       }
       ```
 
-    - 网关接收到消息，取出自身的ip和port，远程调用连接服务的setOnline，传入包含以下信息的UserStompConnection对象到连接服务为用户创建或更新连接，并修改用户状态为上线，用户现在就算在线
+    - 网关接收到消息，取出自身的ip和port，远程调用连接服务的setUserStompConnection，传入包含以下信息的UserStompConnection对象到连接服务为用户创建或更新连接，并修改用户状态为上线，用户现在就算在线
 
       ```json
       {
@@ -139,7 +147,7 @@
     - 如果有新消息，前端依据用户在哪个页面更新UI
       - 若在others, 则**直接**更新tabbar徽标
       - 若在chat，则刷新chat
-      - 若用户在message（？？？）
+      - 若用户在message（？？？这里暂不考虑）
         - 若该message的chatId无新消息，则不更新
         - 否则，刷新message
   - 连接建立时，前端订阅网关的/user/${username}/queue/message端点，并传入onMessage回调，准备实时接受消息
@@ -164,7 +172,7 @@
     - 若用户在others，则**直接**更新tabbar，提示有新消息
     - 若用户在chat，则直接刷新chat，此时无论是新的对话还是老的对话，都会被刷出来，chatId也会有
     - 若用户在message
-      - 若该message的chatId和新消息chatId不匹配，**直接**更新tabbar（这里只需要看chatId，因为如果发来的消息chatId不存在，那用户不可能在对应的message）
+      - 若该message的chatId和新消息chatId不匹配（或者chatId不存在，但是senderId和reciverId与当前message页的“无关”），**直接**更新tabbar
       - 否则，立刻更新到message的界面上，即通过appendFromStomp方法添加到messages数组的最后面
 
 ---
@@ -215,7 +223,7 @@
       ```
 
       后端查询聊天室并更新时间戳
-- 每次退出或者隐藏页面时，更新userIsCurrentlyOnPage为others，清除chatId, 即设置chatId为-1，更新用户最后活跃时间
+- 每次退出或者隐藏页面时，更新userIsCurrentlyOnPage为others，清除chatId, 即设置chatId为-1，清空各类缓冲区，更新用户最后活跃时间
 
 - 每次用户发送聊天消息时
   - 前端向/app/chat端点发送Stomp消息，然后将消息直接appendFromStomp到messages的末尾
@@ -233,9 +241,9 @@
     ```
 
   - Stomp网关接收到消息，直接转交给到传送服务
-消息转发服务查询连接会话
-若不在线则不转发，否则立刻转发
-同时调用消息服务、对话服务进行存储，注意更新一些活跃时间
+    传送服务远程连接会话的getUserStompConnection业务方法获取UserStompConnection
+    若接收者在线则转发，否则不转发，转发主要是设置ip和port，然后调用Stomp网关的sendMessage业务方法，传入MessageDTO，由网关路由到对应destination
+    同时，传送服务调用对话和消息服务进行存储，若会话不存在则创建会话，更新会话的最后消息时间，存储消息
 
 ---
 
