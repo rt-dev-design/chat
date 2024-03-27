@@ -11,6 +11,13 @@
 
 - 关系数据库的实体集和关系集模式
   ![关系数据库实体集关系集模式](doc/img/rdb_schema.jpg)
+  - User的表、实体类和相关数据类以及业务代码，在主模块已经都有了，在这里先简写一下，只写id
+  - 关于Chat实体和关系的说明：
+    lastMessageTime是该对话最近最新的一条消息的创建时间，每次发消息都要更新一下
+    最终的Chat表会有UserxId和UseryId，以及相对应的UserxLastPresentTime和UseryLastPresentTime
+  - 关于Message实体和关系的说明：
+    type目前拟定有text，image和file，text类型对应的content为消息的文本内容，后两者对应的content为文件的url
+    每条message必须同时有一个sender和一个所归属的chat
 - Redis用户连接数据模式
   ![Redis用户连接数据模式](doc/img/redis_usersession.jpg)
 
