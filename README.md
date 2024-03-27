@@ -23,18 +23,18 @@
 
 ## 系统设计
 
-![系统设计](doc/img/architecture_v1.jpg)
+![系统设计](doc/img/architecture_v2.jpg)
 
-## 服务集群中的各个源码项目
+## 服务集群中的各个主要源码项目
 
-- chat-commons：数据原型和相关工具，即entity, dto, vo, enum, util
-- chat-inner-api：内部接口类，目前拟定是RPC接口，供消费者引入和注入，提供者引入和实现
-- chat-websocket-gateway：Stomp网关，对外的Stomp API端点都在这里
-- chat-http-gateway：HTTP网关，对外的HTTP API端点都在这里
-- chat-stomp-connection-service：连接服务，维护用户-Stomp网关IP:port的关系和用户在线状态的数据库（Redis），提供内部接口
-- chat-messaging-service：路由服务，提供内部接口和Rest接口供网关调用，同时协调调用其他服务和Stomp网关的内部接口
-- chat-chat-service：聊天服务，管理聊天资源，提供相关内部接口和Rest接口
-- chat-message-service：消息服务，管理消息资源，提供相关内部接口和Rest接口
+- chat-commons：数据原型和相关工具，entity, dto, vo, enum, util, exception
+- chat-inner-api：内部接口类，目前拟定是使用RPC接口，供消费者引入和使用，提供者引入和实现
+- chat-stomp-gateway：Stomp网关，对外的Stomp端点都在这里
+- chat-http-gateway：HTTP网关，对外的HTTP Rest端点都在这里
+- chat-stomp-connection-service：Stomp连接服务，维护（用户-Stomp网关IP:port）的关系和用户在线状态的数据库（Redis），提供内部接口
+- chat-messaging-service：传送服务，提供内部接口供Stomp网关调用，同时协调调用其他服务，以及调用Stomp网关的内部接口用于消息发送
+- chat-chat-service：聊天服务，管理聊天资源，提供相关内部接口
+- chat-message-service：消息服务，管理消息资源，提供相关内部接口（很可能会和chat-service合为一个微服务）
 
 ## 前端应用中的源码模块
 
@@ -67,7 +67,7 @@
         stompMessageBuffer: [],
         // HTTP请求方法会禁用Stomp消息中聊天消息的追加，等HTTP请求完成并追加完成后再启用
         // 当Stomp追加被禁用时，消息先进缓冲区
-        // 最后再由HTTP请求的回调将缓冲区追加到messages，同时清空缓冲区
+        // 最后再由HTTP请求的回调将缓冲区的消息筛选后追加到messages，同时清空缓冲区
 
         chats: [],
         chatsRequest: {
@@ -169,18 +169,22 @@
 
 ---
 
-- 初次加载和**之后每次显示**chat页面，以及下拉刷新该页面时
+- **初次加载**和之后**每次显示**chat页面，以及**下拉刷新**该页面时
   - 更新userIsCurrentlyOnPage为chat
-  - 前端发http请求向后端分页请求这个用户的聊天视图，代替全局数据的chats数组
   - 将tabbarLabel置为false
+  - 前端发起HTTP请求，向后端分页请求这个用户的聊天视图，直接代替当前chats数组的内容
+  - 后端HTTP网关用ChatController中的listChatVOsByPage端点接受这个请求，DTO为ChatQueryRequest
+  - 网关立刻RPC转交给聊天服务listChatVOsByPage，直接传入ChatQueryRequest，该服务选出包含该用户的所有chats，然后检验是否有新消息，构成ChatVo数组如下返回
   
     ```javascript
     [
         {
-            ...chat,
+            id: 123,
+            thisUsersId: 123,
+            theOtherUsersId: 123,
+            lastMessageTime: "12341",
             thereAreNewMessages: true
         },
-        ...
     ]
     ```
 
@@ -188,25 +192,34 @@
 
 ---
 
-- 初次加载和之后每次显示聊天页面
-  - 通过一个数据模块的方法请求新的聊天数据
-  设置enableStompMessageAppending为false，请求聊天数据，渲染页面，处理Stomp消息缓冲区，再设置enableStompMessageAppending为true
-  - 然后（then）更新用户在这个聊天中的最后活动时间
-    向后端发送
+- **初次加载**和之后**每次显示**聊天页面，以及**下拉刷新**该页面时
+  - 通过一个数据模块的方法请求新的聊天数据，这个方法具体做以下计算：
+  设置enableStompMessageAppending为false
+  尝试请求聊天数据并渲染页面
+  尝试更新用户在这个聊天中的最后活动时间
+  处理异常
+  最后处理Stomp消息缓冲区，再设置enableStompMessageAppending为true
+  各项更细的操作如下：
+    - 向后端请求聊天数据
+      - 前端用的是HTTP网关MessageController里的listMessageVOsByPage端点，传入MessageQueryRequest DTO，这个DTO主要是为了传入senderId, recieverId, 以及可选的chatId
+      - 网关基本上是直接转交聊天和消息服务，如果DTO没有chatId，则根据sender和reciever尝试查询chatId，若查不到直接返回空；如果查到了或者有chatId，则根据chatId查询消息第一页并返回
+    - 更新用户在这个聊天中的最后活动时间，ChatController, updateLastPresentTime, 
+    向后端发送UpdateLastPresentTimeDTO
 
-    ```json
-    {
-      "userId": "userId",
-      "chatId": "chatId"
-    }
-    ```
+      ```json
+      {
+        "userId": "userId",
+        "theOtherUserId": "userId",
+        "chatId": "chatId"
+      }
+      ```
 
-    后端一般是以一个一般的更新类DTO对象来接收，然后查询聊天室并更新时间戳
-- 每次退出或者隐藏页面时，更新userIsCurrentlyOnPage为others，清除chatId
+      后端查询聊天室并更新时间戳
+- 每次退出或者隐藏页面时，更新userIsCurrentlyOnPage为others，清除chatId, 即设置chatId为-1，更新用户最后活跃时间
 
 - 每次用户发送聊天消息时
-  - 前端向/app/chat发送Stomp消息，然后将消息直接appendFromStomp到messages的末尾
-  - 发送的Stomp消息体的具体格式为如下，其中，senderId和recieverId必填，chatId为选填
+  - 前端向/app/chat端点发送Stomp消息，然后将消息直接appendFromStomp到messages的末尾
+  - 发送的Stomp消息体的具体格式MessageDTO如下，其中，senderId和recieverId必填，chatId为选填
 
     ```javascript
     {
@@ -219,7 +232,7 @@
     }
     ```
 
-  - Stomp网关接收到消息，直接转发到转发服务
+  - Stomp网关接收到消息，直接转交给到传送服务
 消息转发服务查询连接会话
 若不在线则不转发，否则立刻转发
 同时调用消息服务、对话服务进行存储，注意更新一些活跃时间
