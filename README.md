@@ -2,7 +2,7 @@
 
 ## 功能特性
 
-- 用户之间一对一聊天
+- 用户之间一对一即时聊天
 - 离线留言
 - 云端永久保存聊天记录
 - 图片和文件共享
@@ -14,14 +14,18 @@
 - Redis用户连接数据模式
   ![Redis用户连接数据模式](doc/img/redis_usersession.jpg)
 
+## 系统设计
+
+![系统设计](doc/img/architecture_v1.jpg)
+
 ## 服务集群中的各个源码项目
 
 - chat-commons：数据原型和相关工具，即entity, dto, vo, enum, util
 - chat-inner-api：内部接口类，目前拟定是RPC接口，供消费者引入和注入，提供者引入和实现
 - chat-websocket-gateway：Stomp网关，对外的Stomp API端点都在这里
 - chat-http-gateway：HTTP网关，对外的HTTP API端点都在这里
-- chat-wssession-service：连接服务，维护用户-Stomp网关IP:port的关系和用户在线状态的数据库（Redis），提供内部接口
-- chat-routing-service：路由服务，提供内部接口和Rest接口供网关调用，同时协调调用其他服务和Stomp网关的内部接口
+- chat-stomp-connection-service：连接服务，维护用户-Stomp网关IP:port的关系和用户在线状态的数据库（Redis），提供内部接口
+- chat-messaging-service：路由服务，提供内部接口和Rest接口供网关调用，同时协调调用其他服务和Stomp网关的内部接口
 - chat-chat-service：聊天服务，管理聊天资源，提供相关内部接口和Rest接口
 - chat-message-service：消息服务，管理消息资源，提供相关内部接口和Rest接口
 
