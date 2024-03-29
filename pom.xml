@@ -46,6 +46,7 @@
         <module>chat-messaging-service</module>
         <module>chat-stomp-connection-service</module>
         <module>chat-chat-and-message-service</module>
+        <module>chat-http-gateway</module>
     </modules>
 
 </project>

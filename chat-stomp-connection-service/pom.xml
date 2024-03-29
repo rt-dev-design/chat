@@ -55,8 +55,13 @@
         </dependency>
         <!-- redis，第二个是启用 Redis Session (Spring Session) 的依赖 -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>3.9.0</version>
         </dependency>
         <!-- https://doc.xiaominfo.com/docs/quick-start#openapi2 -->
         <!-- api 文档生成器 -->

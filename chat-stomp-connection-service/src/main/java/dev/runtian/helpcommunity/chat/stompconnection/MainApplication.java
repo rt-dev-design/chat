@@ -10,7 +10,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
  * 主类，项目入口
  */
 @SpringBootApplication(exclude = {
-        RedisAutoConfiguration.class,
         DataSourceAutoConfiguration.class
 })
 @EnableDubbo
