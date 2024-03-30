@@ -12,10 +12,9 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
  */
 // todo 如需开启 Redis，须移除 exclude 中的内容
 @SpringBootApplication(exclude = {
-        RedisAutoConfiguration.class,
-        DataSourceAutoConfiguration.class
+        RedisAutoConfiguration.class
 })
-// @MapperScan("dev.runtian.helpcommunity.mapper")
+@MapperScan("dev.runtian.helpcommunity.chat.chatandmessage.mapper")
 @EnableDubbo
 public class MainApplication {
 
