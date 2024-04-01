@@ -20,13 +20,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
+        // 可以看作是outbound destinations或者消息队列
         registry.enableSimpleBroker("/user", "/topic");
         registry.setUserDestinationPrefix("/user");
+        // 可以看作是inbound destinations或者API endpoints
         registry.setApplicationDestinationPrefixes("/app");
     }
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
+        // ws://hostname/api/ws
         registry.addEndpoint("/ws")
                 .withSockJS();
         registry.addEndpoint("/ws")

@@ -1,4 +1,4 @@
-# chat模块的架构设计
+# chat模块的设计和实现
 
 ## 功能特性
 
@@ -14,7 +14,7 @@
   - User的表、实体类和相关数据类以及业务代码，在主模块已经都有了，在这里先简写一下，只写id
   - 关于Chat实体和关系的说明：&nbsp;
     lastMessageTime是该对话最近最新的一条消息的创建时间，每次有新消息都要更新一下&nbsp;
-    最终的Chat表会有UserxId和UseryId，以及相对应的UserxLastPresentTime和UseryLastPresentTime
+    最终的Chat表会有userxId和useryId，以及相对应的userxLastPresentTime和useryLastPresentTime
   - 关于Message实体和关系的说明：
     type目前拟定有text，image和file，text类型对应的content为消息的文本内容，后两者对应的content为文件的url
     每条message必须同时有一个sender和一个所归属的chat
@@ -55,16 +55,18 @@
         senderId: 123,
         recieverId: 123,
         chatId: 123,
+        // 各种id值为-1时表示无效
         messageToSend: {
-          id: -1,
           type: "text",
           content: "消息内容"，
           senderId: 123,
           recieverId: 123,
           chatId: 123
         }
-        // 各种id值为-1时表示无效
-        // messageToSend不在store里，而在页面中，v-model
+        // messageToSend不在store里，而在页面中，和页面上的输入双向绑定（v-model）。
+        // 新消息会在各个前端被给定一个lodash生成临时id
+        // 这是因为后端的存储和转发是理论上解耦合的，转发时不一定存了，之后通过HTTP请求时才会获得后端的id
+        // 不能将一个前端的id传给另一个前端，可能会重复
         messages: [],
         // 按时序的某个聊天的消息
         // 有append方法，用于追加一段近期聊天
@@ -129,7 +131,7 @@
       ```
 
   - 连接建立后
-    - 请求HTTP网关GET“自用户上一次离线之后，是否有未读消息”
+    - 请求HTTP网关GET“自用户上一次离线之后，是否有未读消息”，/api/chat/unread
 
       ```json
       {
@@ -159,13 +161,12 @@
 ---
 
 - 当前端从/user/${username}/queue/message端点收到消息，onMessage所做的事：
-  - 后端的消息形式为如下，其中chatId可能不存在，因为一个对话的史上第一条消息是直接从消息服务转发过来的，而消息服务从前端拿到的消息不会有chatId，还没创建
+  - 后端的消息形式为如下，其中chatId可能不存在，因为一个对话的史上第一条消息是直接从消息服务转发过来的，而消息服务从前端拿到的消息不会有chatId，还没创建。也没有message本身的id，所以需要给message添加在本前端的临时id。
   
     ```javascript
     {
-        id: 123,
         type: "text",
-        content: "消息内容"，
+        content: "消息内容",
         senderId: 123,
         recieverId: 123,
         chatId: 123
@@ -204,7 +205,7 @@
 
 ---
 
-- **初次加载**和之后**每次显示**聊天页面，以及**下拉刷新**该页面时
+- **初次加载**和之后**每次显示**message页面，以及**下拉刷新**该页面时
   - 通过一个数据模块的方法请求新的聊天数据，这个方法具体做以下计算：
   设置enableStompMessageAppending为false
   尝试请求聊天数据并渲染页面，并更新请求中的beforeTime
@@ -262,12 +263,12 @@
 
 - 每次用户发送聊天消息时
   - 前端向/app/chat端点发送Stomp消息，然后将消息直接appendFromStomp到messages的末尾
-  - 发送的Stomp消息体的具体格式MessageAddRequest如下，其中，senderId和recieverId必填，chatId为选填（这里，前端必须为消息生成一个不同于后端即将生成的、在前端唯一的key作为message的临时id）
+  - 发送的Stomp消息体的具体格式MessageAddRequest如下，其中，senderId和recieverId必填，chatId为选填（这里，前端必须为消息生成一个不同于后端即将生成的、在前端唯一的key作为message的临时id,传给v-for）
 
     ```javascript
     {
         type: "text",
-        content: "消息内容"，
+        content: "消息内容",
         senderId: 123,
         receiverId: 123,
         chatId: 123
@@ -276,7 +277,7 @@
 
   - Stomp网关接收到消息，直接转交给到传送服务
     传送服务远程连接会话的getUserStompConnection业务方法获取UserStompConnection
-    若接收者在线则转发，否则不转发，转发主要是设置ip和port，然后调用Stomp网关的sendMessage业务方法，传入MessageDTO，由网关路由到对应destination
+    若接收者在线则转发，否则不转发，转发主要是设置ip和port，然后调用Stomp网关的sendMessage业务方法，传入MessageAddRequest，由网关路由到对应destination
     同时，传送服务调用对话和消息服务进行存储，若会话不存在则创建会话，更新会话的最后消息时间，存储消息
 
 ---
