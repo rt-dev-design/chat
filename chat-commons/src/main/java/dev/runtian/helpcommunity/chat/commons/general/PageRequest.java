@@ -1,4 +1,4 @@
-package dev.runtian.helpcommunity.chat.commons.common;
+package dev.runtian.helpcommunity.chat.commons.general;
 
 import dev.runtian.helpcommunity.chat.commons.constant.CommonConstant;
 import lombok.Data;

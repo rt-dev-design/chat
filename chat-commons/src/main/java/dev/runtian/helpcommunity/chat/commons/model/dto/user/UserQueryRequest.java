@@ -1,6 +1,6 @@
 package dev.runtian.helpcommunity.chat.commons.model.dto.user;
 
-import dev.runtian.helpcommunity.chat.commons.common.PageRequest;
+import dev.runtian.helpcommunity.chat.commons.general.PageRequest;
 import java.io.Serializable;
 
 import lombok.Data;

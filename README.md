@@ -38,7 +38,7 @@
 
 ## 前端应用中的源码模块
 
-- 全局数据管理模块，维护聊天功能的相关状态
+- 全局数据管理模块（Vuex），维护聊天功能的相关状态
   - 用户当前在哪个页面
   - 消息页面的相关数据
   - 聊天页面的相关数据
@@ -47,24 +47,28 @@
     {
         userIsCurrentlyOnPage: "chat",
         // 或 "message", 或 "others"
-        // 有对应的getter和setter, 一般在页面的钩子里调用
+        // 有对应的getters和actions, 在页面的钩子和Stomp模块里调用
         // 用户在chat页 <=>  userIsCurrentlyOnPage === "chat"
         // 用户在message页 <=>  userIsCurrentlyOnPage === "message"
 
-        messagePageChatId: "chatId",
-        msg: {
-          id: 123,
+
+        senderId: 123,
+        recieverId: 123,
+        chatId: 123,
+        messageToSend: {
+          id: -1,
           type: "text",
           content: "消息内容"，
           senderId: 123,
           recieverId: 123,
           chatId: 123
         }
-        // 值为-1时表示无效
+        // 各种id值为-1时表示无效
+        // messageToSend不在store里，而在页面中，v-model
         messages: [],
         // 按时序的某个聊天的消息
         // 有append方法，用于追加一段近期聊天
-        // 由appendFromStomp方法
+        // 有appendFromStomp方法
         messagesRequest: {
           current: 1,
           pageSize: 20,
@@ -86,16 +90,16 @@
         }
         // 用户按最后新消息时间倒序排的一页聊天
 
-        tabbarLabel: "true",
+        tabbarLabel: false,
         // 这个是一个可以直接设置的属性
-        // tabbar是否提示新消息，还需要结合chats的复合计算属性
+        // tabbar是否提示新消息，还需要结合chats的某个计算属性
         // 两者优先级和一些限制如下：
         // tabbarDisplaysNotReadLabel = tabbarLabel ? tabbarLabel : computedFromChats
         // 且每次chats刷新时，会将tabbarLabel置为false
     }
     ```
 
-- 调用上述模块更新数据，且对于这些数据进行UI响应的UI组件
+- 调用上述模块更新数据，且不断读取这些数据进行UI更新的UI组件
   - chat聊天（聊天列表）页面
   - message消息（具体的某个聊天）页面
   - tabbar
@@ -104,13 +108,13 @@
 
 ---
 
-- 应用启动且在用户登录后，前端发起请求到某个Stomp网关的/ws端点，与网关建立Stomp连接。以下是建立连接后立刻做什么，类似于onConnect回调：
-  - 连接建立时
-    - 前端发送以下消息到/app/user-connect端点，这里后端直接用一个Long来接收
+- 应用启动且用户登录后，前端发起请求到某个Stomp网关的/ws端点，鉴权通过后，与网关建立Stomp连接。以下是建立连接后，前端立刻需要做什么，类似于一种onConnect回调：
+  - 连接建立后
+    - 前端发送以下消息到/app/user-connect端点，这里后端直接用一个专门传各种id的DTO IdRequest来接收
   
       ```json
       {
-          "userId": "userId"
+          "id": "userId"
       }
       ```
 
@@ -124,18 +128,18 @@
       }
       ```
 
-  - 连接建立时
-    - 请求HTTP网关GET自用户上一次离线之后，是否有未读消息
+  - 连接建立后
+    - 请求HTTP网关GET“自用户上一次离线之后，是否有未读消息”
 
       ```json
       {
-          "userId": "userId"
+          "id": "userId"
       }
       ```
 
-    - http网关接收到消息，转发给聊天服务做查询
+    - HTTP网关接收到消息，转发给聊天服务做查询
     - 聊天服务查询：
-      查询该用户的所有用户聊天，对比用户最后活跃时间和聊天的最新消息时间，若有任何一个活跃小于最新，则是true，否则false
+      查询该用户参与的所有聊天，对比该用户最后活跃时间和聊天的最新消息时间，若有任何一个活跃小于最新，则是true，否则false
     - 返回该用户是否有未读消息
   
       ```javasript
@@ -147,10 +151,10 @@
     - 如果有新消息，前端依据用户在哪个页面更新UI
       - 若在others, 则**直接**更新tabbar徽标
       - 若在chat，则刷新chat
-      - 若用户在message（？？？这里暂不考虑）
+      - 若用户在message（？这种情况暂不考虑和实现）
         - 若该message的chatId无新消息，则不更新
         - 否则，刷新message
-  - 连接建立时，前端订阅网关的/user/${username}/queue/message端点，并传入onMessage回调，准备实时接受消息
+  - 连接建立后，前端订阅网关的/user/${username}/queue/message端点，传入onMessage回调，准备实时接受消息
 
 ---
 
@@ -180,7 +184,7 @@
 - **初次加载**和之后**每次显示**chat页面，以及**下拉刷新**该页面时
   - 更新userIsCurrentlyOnPage为chat
   - 将tabbarLabel置为false
-  - 前端发起HTTP请求，向后端分页请求这个用户的聊天视图，直接代替当前chats数组的内容
+  - 前端发起HTTP请求，向后端分页请求这个用户的聊天视图，直接代替（set）当前chats数组的内容
   - 后端HTTP网关用ChatController中的listChatVOsByPage端点接受这个请求，DTO为ChatQueryRequest
   - 网关立刻RPC转交给聊天服务listChatVOsByPage，直接传入ChatQueryRequest，该服务选出包含该用户的所有chats，然后检验是否有新消息，构成ChatVo数组如下返回
   
@@ -188,9 +192,9 @@
     [
         {
             id: 123,
-            thisUsersId: 123,
-            theOtherUsersId: 123,
+            theOtherUser: {},
             lastMessageTime: "12341",
+            lastMessage: "content",
             thereAreNewMessages: true
         },
     ]
@@ -203,39 +207,69 @@
 - **初次加载**和之后**每次显示**聊天页面，以及**下拉刷新**该页面时
   - 通过一个数据模块的方法请求新的聊天数据，这个方法具体做以下计算：
   设置enableStompMessageAppending为false
-  尝试请求聊天数据并渲染页面
+  尝试请求聊天数据并渲染页面，并更新请求中的beforeTime
   尝试更新用户在这个聊天中的最后活动时间
   处理异常
   最后处理Stomp消息缓冲区，再设置enableStompMessageAppending为true
   各项更细的操作如下：
     - 向后端请求聊天数据
-      - 前端用的是HTTP网关MessageController里的listMessageVOsByPage端点，传入MessageQueryRequest DTO，这个DTO主要是为了传入senderId, recieverId, 以及可选的chatId
-      - 网关基本上是直接转交聊天和消息服务，如果DTO没有chatId，则根据sender和reciever尝试查询chatId，若查不到直接返回空；如果查到了或者有chatId，则根据chatId查询消息第一页并返回
-    - 更新用户在这个聊天中的最后活动时间，ChatController, updateLastPresentTime, 
-    向后端发送UpdateLastPresentTimeDTO
+      - 前端用的是HTTP网关MessageController里的listMessageVOsByPage端点，传入MessageQueryRequest DTO，这个DTO主要是为了传入senderId, recieverId（以及可选的chatId）还有beforeTime，第一次请求的beforeTime可以为空
 
-      ```json
-      {
-        "userId": "userId",
-        "theOtherUserId": "userId",
-        "chatId": "chatId"
+        ```java
+        public class MessageQueryRequest extends PageRequest {
+            private Long chatId;
+            private Long senderId;
+            private Long receiverId;
+            private Date beforeTime;
+            private Long id;
+            private String type;
+            private String content;
+        }
+        ```
+
+      - 网关基本上是直接转交聊天和消息服务，消息服务做的事情是，如果DTO没有chatId，则根据sender和reciever尝试查询chatId，若查不到直接返回空；如果有chatId，则根据chatId查询消息第一页并返回。消息的第一页指的是，符合条件的消息ORDER BY createTime DESCEND LIMIT pageSize后的数据的逆序（它们将被插入视图数组messages的开头）。
+      - MessageVO的具体形式：
+
+        ```java
+        public class MessageVO {
+            private Long id;
+            private Date createTime;
+            private String type;
+            private String content;
+            private Long chatId;
+            private Long senderId;
+        }
+        ```
+
+    - 更新用户在这个聊天中的最后活动时间，ChatController, updateLastPresentTime, 向后端发送UpdateLastPresentTimeDTO, 后端查询聊天室并更新时间戳
+
+      ```java
+      public class UpdateLastPresentTimeDTO {
+          private Long id;
+          /**
+           * 更新这个用户的最后活动时间
+           */
+          private Long thisUsersId;
+          // 这个只是在没有chatId时帮助查询
+          private Long theOtherUsersId;
       }
       ```
 
-      后端查询聊天室并更新时间戳
-- 每次退出或者隐藏页面时，更新userIsCurrentlyOnPage为others，清除chatId, 即设置chatId为-1，清空各类缓冲区，更新用户最后活跃时间
+- 每次退出或者隐藏页面时，
+  - 更新userIsCurrentlyOnPage为others
+  - 清除chatId, 即设置chatId为-1，清空各类缓冲区等等，总之，把message模块里的数据都变回初始化后的状态
+  - 更新用户最后活跃时间
 
 - 每次用户发送聊天消息时
   - 前端向/app/chat端点发送Stomp消息，然后将消息直接appendFromStomp到messages的末尾
-  - 发送的Stomp消息体的具体格式MessageDTO如下，其中，senderId和recieverId必填，chatId为选填
+  - 发送的Stomp消息体的具体格式MessageAddRequest如下，其中，senderId和recieverId必填，chatId为选填（这里，前端必须为消息生成一个不同于后端即将生成的、在前端唯一的key作为message的临时id）
 
     ```javascript
     {
-        id: 123,
         type: "text",
         content: "消息内容"，
         senderId: 123,
-        recieverId: 123,
+        receiverId: 123,
         chatId: 123
     }
     ```
@@ -248,5 +282,5 @@
 ---
 
 - 用户注销或者应用关闭时
-  - 前端发消息到/app/user-disconnect端点，网关接收消息后，调用连接服务的setOffline，传入userId，修改用户在线状态为下线
+  - 前端使用IdRequest发消息到/app/user-disconnect端点，网关接收消息后，调用连接服务的setOffline，最终传入userId，修改用户在线状态为下线
   - 同时，前端断开Stomp连接

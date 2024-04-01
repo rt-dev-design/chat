@@ -1,4 +1,4 @@
-package dev.runtian.helpcommunity.chat.commons.common;
+package dev.runtian.helpcommunity.chat.commons.general;
 
 /**
  * 自定义错误码

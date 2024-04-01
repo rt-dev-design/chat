@@ -1,4 +1,4 @@
-package dev.runtian.helpcommunity.chat.commons.common;
+package dev.runtian.helpcommunity.chat.commons.general;
 
 /**
  * 返回/响应/结果工具类

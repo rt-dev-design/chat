@@ -1,6 +1,6 @@
 package dev.runtian.helpcommunity.chat.commons.exception;
 
-import dev.runtian.helpcommunity.chat.commons.common.ErrorCode;
+import dev.runtian.helpcommunity.chat.commons.general.ErrorCode;
 
 /**
  * 抛异常工具类

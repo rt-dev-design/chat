@@ -1,8 +1,8 @@
 package dev.runtian.helpcommunity.chat.commons.exception;
 
-import dev.runtian.helpcommunity.chat.commons.common.BaseResponse;
-import dev.runtian.helpcommunity.chat.commons.common.ErrorCode;
-import dev.runtian.helpcommunity.chat.commons.common.ResultUtils;
+import dev.runtian.helpcommunity.chat.commons.general.BaseResponse;
+import dev.runtian.helpcommunity.chat.commons.general.ErrorCode;
+import dev.runtian.helpcommunity.chat.commons.general.ResultUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

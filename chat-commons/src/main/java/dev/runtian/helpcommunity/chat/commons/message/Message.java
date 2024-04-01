@@ -1,4 +1,4 @@
-package dev.runtian.helpcommunity.chat.commons.chat;
+package dev.runtian.helpcommunity.chat.commons.message;
 
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;

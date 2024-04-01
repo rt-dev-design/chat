@@ -1,6 +1,6 @@
 package dev.runtian.helpcommunity.chat.commons.model.dto.postfavour;
 
-import dev.runtian.helpcommunity.chat.commons.common.PageRequest;
+import dev.runtian.helpcommunity.chat.commons.general.PageRequest;
 import dev.runtian.helpcommunity.chat.commons.model.dto.post.PostQueryRequest;
 import java.io.Serializable;
 

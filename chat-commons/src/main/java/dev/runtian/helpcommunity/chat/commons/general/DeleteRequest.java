@@ -1,4 +1,4 @@
-package dev.runtian.helpcommunity.chat.commons.common;
+package dev.runtian.helpcommunity.chat.commons.general;
 
 import java.io.Serializable;
 import lombok.Data;
