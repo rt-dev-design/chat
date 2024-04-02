@@ -185,7 +185,7 @@
 - **初次加载**和之后**每次显示**chat页面，以及**下拉刷新**该页面时
   - 更新userIsCurrentlyOnPage为chat
   - 将tabbarLabel置为false
-  - 前端发起HTTP请求，向后端分页请求这个用户的聊天视图，直接代替（set）当前chats数组的内容
+  - 前端发起HTTP请求，向后端/api/chat/chat-vos-page端点分页请求这个用户的聊天视图，直接代替（set）当前chats数组
   - 后端HTTP网关用ChatController中的listChatVOsByPage端点接受这个请求，DTO为ChatQueryRequest
   - 网关立刻RPC转交给聊天服务listChatVOsByPage，直接传入ChatQueryRequest，该服务选出包含该用户的所有chats，然后检验是否有新消息，构成ChatVo数组如下返回
   
@@ -205,10 +205,10 @@
 
 ---
 
-- **初次加载**和之后**每次显示**message页面，以及**下拉刷新**该页面时
+- **初次加载**和之后**每次显示**message页面
   - 通过一个数据模块的方法请求新的聊天数据，这个方法具体做以下计算：
   设置enableStompMessageAppending为false
-  尝试请求聊天数据并渲染页面，并更新请求中的beforeTime
+  尝试请求聊天数据/api/message/message-vos-page，渲染页面（并更新请求中的beforeTime）
   尝试更新用户在这个聊天中的最后活动时间
   处理异常
   最后处理Stomp消息缓冲区，再设置enableStompMessageAppending为true
@@ -242,7 +242,7 @@
         }
         ```
 
-    - 更新用户在这个聊天中的最后活动时间，ChatController, updateLastPresentTime, 向后端发送UpdateLastPresentTimeDTO, 后端查询聊天室并更新时间戳
+    - 更新用户在这个聊天中的最后活动时间，ChatController, updateLastPresentTime, /api/chat/update-last-present-time, 向后端发送UpdateLastPresentTimeDTO, 后端查询聊天室并更新时间戳
 
       ```java
       public class UpdateLastPresentTimeDTO {
@@ -256,6 +256,8 @@
       }
       ```
 
+- 每次**下拉刷新**该页面时
+  发起请求，添加到messages前面
 - 每次退出或者隐藏页面时，
   - 更新userIsCurrentlyOnPage为others
   - 清除chatId, 即设置chatId为-1，清空各类缓冲区等等，总之，把message模块里的数据都变回初始化后的状态
@@ -270,7 +272,7 @@
         type: "text",
         content: "消息内容",
         senderId: 123,
-        receiverId: 123,
+        recipientId: 123,
         chatId: 123
     }
     ```

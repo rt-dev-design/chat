@@ -19,8 +19,8 @@ public class MessageAddRequest implements Serializable {
 
     private Long senderId;
 
-    private Long receiverId;
-    
+    private Long recipientId;
+
     private Long chatId;
 
     private static final long serialVersionUID = 1L;

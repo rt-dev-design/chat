@@ -16,7 +16,7 @@ public class MessageQueryRequest extends PageRequest implements Serializable {
 
     private Long senderId;
 
-    private Long receiverId;
+    private Long recipientId;
 
     private Date beforeTime;
 
