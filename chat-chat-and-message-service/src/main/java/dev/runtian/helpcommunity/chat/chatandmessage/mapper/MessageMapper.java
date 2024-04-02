@@ -2,7 +2,7 @@ package dev.runtian.helpcommunity.chat.chatandmessage.mapper;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import dev.runtian.helpcommunity.chat.commons.chat.Message;
+import dev.runtian.helpcommunity.commons.message.Message;
 
 /**
 * @author rt

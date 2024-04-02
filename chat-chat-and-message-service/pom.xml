@@ -6,12 +6,11 @@
 
     <!-- 这是一个 Spring Boot 项目，依赖版本被控制在2.7.2 -->
     <parent>
-        <groupId>dev.runtian</groupId>
-        <artifactId>campus-mutual-help-community-chat</artifactId>
+        <groupId>dev.runtian.helpcommunity</groupId>
+        <artifactId>campus-mutual-help-community</artifactId>
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>dev.runtian</groupId>
     <artifactId>chat-chat-and-message</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>chat-chat-and-message</name>
@@ -23,13 +22,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>dev.runtian</groupId>
-            <artifactId>chat-commons</artifactId>
+            <groupId>dev.runtian.helpcommunity</groupId>
+            <artifactId>commons</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
-            <groupId>dev.runtian</groupId>
-            <artifactId>chat-inner-api</artifactId>
+            <groupId>dev.runtian.helpcommunity</groupId>
+            <artifactId>inner-api</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>

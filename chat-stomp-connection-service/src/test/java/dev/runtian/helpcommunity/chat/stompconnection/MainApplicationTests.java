@@ -1,7 +1,7 @@
 package dev.runtian.helpcommunity.chat.stompconnection;
 
-import dev.runtian.helpcommunity.chat.commons.stompconnection.UserStompConnection;
 import dev.runtian.helpcommunity.chat.stompconnection.repository.UserStompConnectionRepository;
+import dev.runtian.helpcommunity.commons.stompconnection.UserStompConnection;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

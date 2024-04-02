@@ -18,7 +18,7 @@
     }
   },
   "compileType": "miniprogram",
-  "libVersion": "3.3.5",
+  "libVersion": "3.4.0",
   "appid": "wx40ad38cda5ad6bf0",
   "projectname": "stomp-demo",
   "condition": {},

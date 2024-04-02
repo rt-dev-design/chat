@@ -1,7 +1,7 @@
 package dev.runtian.helpcommunity.chat.stompconnection.service.test;
 
-import dev.runtian.helpcommunity.chat.commons.test.TestDto;
-import dev.runtian.helpcommunity.chat.innerapi.test.TestStompConnectionService;
+import dev.runtian.helpcommunity.commons.test.TestDto;
+import dev.runtian.helpcommunity.innerapi.test.TestStompConnectionService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.stereotype.Component;

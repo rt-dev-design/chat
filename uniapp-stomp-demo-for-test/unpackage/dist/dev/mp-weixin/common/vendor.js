@@ -9477,9 +9477,9 @@ internalMixin(Vue);
 
 /***/ }),
 /* 26 */
-/*!***********************************************************************************!*\
-  !*** F:/GraduationProject/chat/chat-module/uniapp-stomp-demo-for-test/pages.json ***!
-  \***********************************************************************************/
+/*!**************************************************************************************!*\
+  !*** F:/GraduationProject/chat/help-community/uniapp-stomp-demo-for-test/pages.json ***!
+  \**************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports) {
 
@@ -9629,9 +9629,9 @@ function normalizeComponent (
 /* 37 */,
 /* 38 */,
 /* 39 */
-/*!****************************************************************************************!*\
-  !*** F:/GraduationProject/chat/chat-module/uniapp-stomp-demo-for-test/websocket/ws.js ***!
-  \****************************************************************************************/
+/*!*******************************************************************************************!*\
+  !*** F:/GraduationProject/chat/help-community/uniapp-stomp-demo-for-test/websocket/ws.js ***!
+  \*******************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -9839,9 +9839,9 @@ exports.default = _default;
 
 /***/ }),
 /* 40 */
-/*!*******************************************************************************************!*\
-  !*** F:/GraduationProject/chat/chat-module/uniapp-stomp-demo-for-test/websocket/stomp.js ***!
-  \*******************************************************************************************/
+/*!**********************************************************************************************!*\
+  !*** F:/GraduationProject/chat/help-community/uniapp-stomp-demo-for-test/websocket/stomp.js ***!
+  \**********************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10313,9 +10313,9 @@ exports.default = _default;
 
 /***/ }),
 /* 41 */
-/*!**************************************************************************************************!*\
-  !*** F:/GraduationProject/chat/chat-module/uniapp-stomp-demo-for-test/websocket/uniWebSocket.js ***!
-  \**************************************************************************************************/
+/*!*****************************************************************************************************!*\
+  !*** F:/GraduationProject/chat/help-community/uniapp-stomp-demo-for-test/websocket/uniWebSocket.js ***!
+  \*****************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10493,9 +10493,9 @@ exports.default = _default;
 
 /***/ }),
 /* 42 */
-/*!*****************************************************************************************!*\
-  !*** F:/GraduationProject/chat/chat-module/uniapp-stomp-demo-for-test/config/config.js ***!
-  \*****************************************************************************************/
+/*!********************************************************************************************!*\
+  !*** F:/GraduationProject/chat/help-community/uniapp-stomp-demo-for-test/config/config.js ***!
+  \********************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -10532,9 +10532,9 @@ function refreshToken() {
 
 /***/ }),
 /* 43 */
-/*!*********************************************************************************************!*\
-  !*** F:/GraduationProject/chat/chat-module/uniapp-stomp-demo-for-test/config/sha256.min.js ***!
-  \*********************************************************************************************/
+/*!************************************************************************************************!*\
+  !*** F:/GraduationProject/chat/help-community/uniapp-stomp-demo-for-test/config/sha256.min.js ***!
+  \************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -11148,9 +11148,9 @@ module.exports = __webpack_amd_options__;
 
 /***/ }),
 /* 48 */
-/*!*********************************************************************************************!*\
-  !*** F:/GraduationProject/chat/chat-module/uniapp-stomp-demo-for-test/utils/logmessages.js ***!
-  \*********************************************************************************************/
+/*!************************************************************************************************!*\
+  !*** F:/GraduationProject/chat/help-community/uniapp-stomp-demo-for-test/utils/logmessages.js ***!
+  \************************************************************************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 

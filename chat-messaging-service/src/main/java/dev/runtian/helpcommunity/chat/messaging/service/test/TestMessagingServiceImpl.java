@@ -1,10 +1,10 @@
 package dev.runtian.helpcommunity.chat.messaging.service.test;
 
-import dev.runtian.helpcommunity.chat.commons.test.TestDto;
-import dev.runtian.helpcommunity.chat.innerapi.test.TestChatAndMessageService;
-import dev.runtian.helpcommunity.chat.innerapi.test.TestMessagingService;
-import dev.runtian.helpcommunity.chat.innerapi.test.TestStompConnectionService;
-import dev.runtian.helpcommunity.chat.innerapi.test.TestStompGatewayService;
+import dev.runtian.helpcommunity.commons.test.TestDto;
+import dev.runtian.helpcommunity.innerapi.test.TestChatAndMessageService;
+import dev.runtian.helpcommunity.innerapi.test.TestMessagingService;
+import dev.runtian.helpcommunity.innerapi.test.TestStompConnectionService;
+import dev.runtian.helpcommunity.innerapi.test.TestStompGatewayService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.annotation.DubboReference;

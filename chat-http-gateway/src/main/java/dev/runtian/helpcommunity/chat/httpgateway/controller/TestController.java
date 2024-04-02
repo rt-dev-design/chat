@@ -1,14 +1,14 @@
 package dev.runtian.helpcommunity.chat.httpgateway.controller;
 
-import dev.runtian.helpcommunity.chat.commons.test.TestDto;
-import dev.runtian.helpcommunity.chat.innerapi.test.TestChatAndMessageService;
+import dev.runtian.helpcommunity.commons.test.TestDto;
+import dev.runtian.helpcommunity.innerapi.test.TestChatAndMessageService;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/test")
 public class TestController {
-    @DubboReference
+    @DubboReference(check = false)
     private TestChatAndMessageService testChatAndMessageService;
 
     @PostMapping("/hello")

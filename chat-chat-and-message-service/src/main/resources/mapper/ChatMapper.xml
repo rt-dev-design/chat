@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="dev.runtian.helpcommunity.chat.chatandmessage.mapper.ChatMapper">
 
-    <resultMap id="BaseResultMap" type="dev.runtian.helpcommunity.chat.commons.chat.Chat">
+    <resultMap id="BaseResultMap" type="dev.runtian.helpcommunity.commons.chat.Chat">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>

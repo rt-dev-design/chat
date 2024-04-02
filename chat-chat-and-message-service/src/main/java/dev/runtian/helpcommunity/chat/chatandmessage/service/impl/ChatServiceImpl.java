@@ -3,8 +3,8 @@ package dev.runtian.helpcommunity.chat.chatandmessage.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.runtian.helpcommunity.chat.chatandmessage.mapper.ChatMapper;
-import dev.runtian.helpcommunity.chat.commons.chat.Chat;
-import dev.runtian.helpcommunity.chat.innerapi.chat.ChatService;
+import dev.runtian.helpcommunity.commons.chat.Chat;
+import dev.runtian.helpcommunity.innerapi.chat.ChatService;
 import org.springframework.stereotype.Service;
 
 /**

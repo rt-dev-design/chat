@@ -12,10 +12,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>dev.runtian</groupId>
-    <artifactId>campus-mutual-help-community-chat</artifactId>
+    <groupId>dev.runtian.helpcommunity</groupId>
+    <artifactId>campus-mutual-help-community</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>campus-mutual-help-community-chat</name>
+    <name>campus-mutual-help-community</name>
 
     <packaging>pom</packaging>
 
@@ -40,13 +40,12 @@
     </dependencyManagement>
 
     <modules>
-        <module>chat-commons</module>
-        <module>chat-inner-api</module>
+        <module>commons</module>
+        <module>inner-api</module>
         <module>chat-stomp-gateway</module>
         <module>chat-messaging-service</module>
         <module>chat-stomp-connection-service</module>
         <module>chat-chat-and-message-service</module>
         <module>chat-http-gateway</module>
     </modules>
-
 </project>

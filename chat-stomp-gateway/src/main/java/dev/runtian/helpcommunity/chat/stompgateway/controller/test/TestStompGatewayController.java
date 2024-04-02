@@ -1,8 +1,7 @@
 package dev.runtian.helpcommunity.chat.stompgateway.controller.test;
 
-
-import dev.runtian.helpcommunity.chat.commons.test.TestDto;
-import dev.runtian.helpcommunity.chat.innerapi.test.TestMessagingService;
+import dev.runtian.helpcommunity.commons.test.TestDto;
+import dev.runtian.helpcommunity.innerapi.test.TestMessagingService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.common.utils.NetUtils;
 import org.apache.dubbo.config.annotation.DubboReference;
