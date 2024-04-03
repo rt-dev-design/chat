@@ -1,6 +1,6 @@
 package dev.runtian.helpcommunity.commons.chat;
 
-import dev.runtian.helpcommunity.commons.model.vo.UserVO;
+import dev.runtian.helpcommunity.commons.user.UserVO;
 import lombok.*;
 
 import java.io.Serializable;

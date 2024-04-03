@@ -6,16 +6,14 @@
 
     <!-- 这是一个 Spring Boot 项目，依赖版本被控制在2.7.2 -->
     <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.2</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <groupId>dev.runtian.helpcommunity</groupId>
+        <artifactId>campus-mutual-help-community</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <groupId>dev.runtian</groupId>
-    <artifactId>campus-mutual-help-community-backend</artifactId>
+    <artifactId>campus-mutual-help-community-backend-main-part</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>campus-mutual-help-community-backend</name>
+    <name>campus-mutual-help-community-backend-main-part</name>
 
     <!-- Java 的版本是1.8 -->
     <properties>
@@ -24,6 +22,24 @@
 
     <dependencies>
         <!-- FreeMarker 视图技术，在 MVC 中使用 -->
+        <dependency>
+            <groupId>dev.runtian.helpcommunity</groupId>
+            <artifactId>commons</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.runtian.helpcommunity</groupId>
+            <artifactId>inner-api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.dubbo</groupId>
+            <artifactId>dubbo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba.nacos</groupId>
+            <artifactId>nacos-client</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-freemarker</artifactId>

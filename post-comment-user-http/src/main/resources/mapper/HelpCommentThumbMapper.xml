@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="dev.runtian.helpcommunity.mapper.HelpCommentThumbMapper">
+<mapper namespace="dev.runtian.helpcommunity.mainpart.mapper.HelpCommentThumbMapper">
 
-    <resultMap id="BaseResultMap" type="dev.runtian.helpcommunity.model.entity.HelpCommentThumb">
+    <resultMap id="BaseResultMap" type="dev.runtian.helpcommunity.commons.helpcommnet.HelpCommentThumb">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="helpCommentId" column="helpCommentId" jdbcType="BIGINT"/>
             <result property="userId" column="userId" jdbcType="BIGINT"/>

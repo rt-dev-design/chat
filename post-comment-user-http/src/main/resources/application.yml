@@ -1,7 +1,7 @@
 # 公共配置文件
 spring:
   application:
-    name: campus-mutual-help-community-backend
+    name: campus-mutual-help-community-backend-main-part
   # 默认 dev 环境
   profiles:
     active: dev
@@ -99,3 +99,12 @@ knife4j:
         api-rule: package
         api-rule-resources:
           - dev.runtian.helpcommunity.controller
+dubbo:
+  application:
+    name: campus-mutual-help-community-backend-main-part
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    id: nacos-registry
+    address: nacos://localhost:8848

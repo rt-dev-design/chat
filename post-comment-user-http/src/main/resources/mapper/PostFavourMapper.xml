@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="dev.runtian.helpcommunity.mapper.PostFavourMapper">
+<mapper namespace="dev.runtian.helpcommunity.mainpart.mapper.PostFavourMapper">
 
-    <resultMap id="BaseResultMap" type="dev.runtian.helpcommunity.model.entity.PostFavour">
+    <resultMap id="BaseResultMap" type="dev.runtian.helpcommunity.commons.postfavour.PostFavour">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="postId" column="postId" jdbcType="BIGINT"/>
         <result property="userId" column="userId" jdbcType="BIGINT"/>
@@ -18,7 +18,7 @@
     </sql>
 
     <select id="listFavourPostByPage"
-            resultType="dev.runtian.helpcommunity.model.entity.Post">
+            resultType="dev.runtian.helpcommunity.commons.post.Post">
         select p.*
         from post p
                  join (select postId from post_favour where userId = #{favourUserId}) pf

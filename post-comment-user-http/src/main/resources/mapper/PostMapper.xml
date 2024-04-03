@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="dev.runtian.helpcommunity.mapper.PostMapper">
+<mapper namespace="dev.runtian.helpcommunity.mainpart.mapper.PostMapper">
 
-    <resultMap id="BaseResultMap" type="dev.runtian.helpcommunity.model.entity.Post">
+    <resultMap id="BaseResultMap" type="dev.runtian.helpcommunity.commons.post.Post">
         <id property="id" column="id" jdbcType="BIGINT"/>
         <result property="title" column="title" jdbcType="VARCHAR"/>
         <result property="content" column="content" jdbcType="VARCHAR"/>
@@ -23,13 +23,13 @@
         createTime,updateTime,isDelete
     </sql>
 
-    <select id="listPostWithDelete" resultType="dev.runtian.helpcommunity.model.entity.Post">
+    <select id="listPostWithDelete" resultType="dev.runtian.helpcommunity.commons.post.Post">
         select *
         from post
         where updateTime >= #{minUpdateTime}
     </select>
 
-    <select id="selectDeletedPostsByPage" resultType="dev.runtian.helpcommunity.model.entity.Post">
+    <select id="selectDeletedPostsByPage" resultType="dev.runtian.helpcommunity.commons.post.Post">
         SELECT *
         FROM post
         WHERE isDelete = 1
