@@ -7,7 +7,6 @@ import dev.runtian.helpcommunity.commons.user.LoginUserVO;
 import dev.runtian.helpcommunity.commons.user.User;
 import dev.runtian.helpcommunity.commons.user.UserQueryRequest;
 import dev.runtian.helpcommunity.commons.user.UserVO;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -40,14 +39,7 @@ public interface UserService extends IService<User> {
      */
     LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest request, HttpServletResponse response);
 
-    /**
-     * 用户登录（微信开放平台）
-     *
-     * @param wxOAuth2UserInfo 从微信获取的用户信息
-     * @param request          当前请求
-     * @return                 脱敏后的用户信息
-     */
-    LoginUserVO userLoginByMpOpen(WxOAuth2UserInfo wxOAuth2UserInfo, HttpServletRequest request);
+
 
     /**
      * 获取当前登录用户

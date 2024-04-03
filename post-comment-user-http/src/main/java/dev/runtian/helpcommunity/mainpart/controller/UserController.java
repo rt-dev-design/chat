@@ -25,9 +25,6 @@ import javax.servlet.http.HttpServletResponse;
 import dev.runtian.helpcommunity.mainpart.config.WxOpenConfig;
 import dev.runtian.helpcommunity.mainpart.service.impl.UserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import me.chanjar.weixin.common.bean.WxOAuth2UserInfo;
-import me.chanjar.weixin.common.bean.oauth2.WxOAuth2AccessToken;
-import me.chanjar.weixin.mp.api.WxMpService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.util.DigestUtils;
@@ -97,41 +94,6 @@ public class UserController {
         }
         LoginUserVO loginUserVO = userService.userLogin(userAccount, userPassword, request, response);
         return ResultUtils.success(loginUserVO);
-    }
-
-    /**
-     * 微信开放平台用户登录端点 userLoginByWxOpen
-     * 参数: this(service和config), code(一个问号参数，应微信所求), request(servlet, 用于传给业务创建session)
-     * 返回: 登录前端所需要的用户视图, 或抛异常并返回错误信息
-     * 映射: /user/login/wx_open
-     */
-    @GetMapping("/login/wx_open")
-    public BaseResponse<LoginUserVO> userLoginByWxOpen(
-            HttpServletRequest request,
-            @RequestParam("code") String code
-    ) {
-        try {
-            // 获取微信开放平台服务 bean(这里它没有被框架管)
-            // 按微信的要求做 2 次请求，抛异常则catch, 打日志，然后 rethrow
-            // 拿到请求结果后做初步校验，可能抛异常，同样会捕获打日志然后 rethrow
-            // （先捕获后重抛是因为微信服务抛出的异常不在业务异常的类树里面）
-            // 然后调业务做更多的动作
-            // （其实这里已经写了太多业务）
-            // 返回用户视图
-            WxMpService wxService = wxOpenConfig.getWxMpService();
-            WxOAuth2AccessToken accessToken = wxService.getOAuth2Service().getAccessToken(code);
-            WxOAuth2UserInfo userInfo = wxService.getOAuth2Service().getUserInfo(accessToken, code);
-
-            String unionId = userInfo.getUnionId();
-            String mpOpenId = userInfo.getOpenid();
-            if (StringUtils.isAnyBlank(unionId, mpOpenId)) {
-                throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败，系统错误");
-            }
-            return ResultUtils.success(userService.userLoginByMpOpen(userInfo, request));
-        } catch (Exception e) {
-            log.error("userLoginByWxOpen error", e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败，系统错误");
-        }
     }
 
     @PostMapping("/login/wx-mini")

@@ -160,50 +160,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     /**
-     * 微信用户登录业务方法 userLoginByMpOpen
-     * 若自己的库还没有这个用户，则创建，同时更新 session
-     * 本质是一次 insert if not exists 加上一次 insert or update
-     *
-     * this(IService, ServiceImpl, mappers)
-     * @param wxOAuth2UserInfo 从微信返回的用户信息，由控件请求并传下来
-     * @param request servlet
-     *
-     * @return 登录后所需的用户视图
-     * 或者抛异常
-     */
-    @Override
-    public LoginUserVO userLoginByMpOpen(WxOAuth2UserInfo wxOAuth2UserInfo, HttpServletRequest request) {
-        String unionId = wxOAuth2UserInfo.getUnionId();
-        String mpOpenId = wxOAuth2UserInfo.getOpenid();
-        // 单机锁, insert if not exists
-        synchronized (unionId.intern()) {
-            // 构造语句并查询用户是否已存在
-            QueryWrapper<User> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("unionId", unionId);
-            User user = this.getOne(queryWrapper);
-            // 被封号，禁止登录
-            if (user != null && UserRoleEnum.BAN.getValue().equals(user.getUserRole())) {
-                throw new BusinessException(ErrorCode.FORBIDDEN_ERROR, "该用户已被封，禁止登录");
-            }
-            // 用户不存在则创建
-            if (user == null) {
-                user = new User();
-                user.setUnionId(unionId);
-                user.setMpOpenId(mpOpenId);
-                user.setUserAvatar(wxOAuth2UserInfo.getHeadImgUrl());
-                user.setUserName(wxOAuth2UserInfo.getNickname());
-                boolean result = this.save(user);
-                if (!result) {
-                    throw new BusinessException(ErrorCode.SYSTEM_ERROR, "登录失败");
-                }
-            }
-            // 记录用户的登录态
-            request.getSession().setAttribute(USER_LOGIN_STATE, user);
-            return getLoginUserVO(user);
-        }
-    }
-
-    /**
      * 获取当前用户业务方法 getLoginUser
      * 本质是 2 次查询，一次查 session，一次查主库
      *

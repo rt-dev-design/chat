@@ -12,7 +12,7 @@ spring:
   # session 配置
   session:
     # todo 取消注释开启分布式 session（须先配置 Redis）
-    # store-type: redis
+    store-type: redis
     # 30 天过期
     timeout: 2592000
   # 数据库配置
@@ -22,7 +22,11 @@ spring:
     url: jdbc:mysql://localhost:3306/my_db
     username: root
     password: 123456
-
+  redis:
+    database: 1
+    host: localhost
+    port: 6379
+    timeout: 5000
   # 文件上传
   servlet:
     multipart:

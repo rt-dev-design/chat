@@ -1,5 +1,6 @@
-package dev.runtian.helpcommunity.commons.exception;
+package dev.runtian.helpcommunity.mainpart.exception;
 
+import dev.runtian.helpcommunity.commons.exception.BusinessException;
 import dev.runtian.helpcommunity.commons.general.BaseResponse;
 import dev.runtian.helpcommunity.commons.general.ErrorCode;
 import dev.runtian.helpcommunity.commons.general.ResultUtils;

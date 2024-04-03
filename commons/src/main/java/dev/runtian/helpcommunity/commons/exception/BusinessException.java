@@ -1,11 +1,13 @@
 package dev.runtian.helpcommunity.commons.exception;
 
 import dev.runtian.helpcommunity.commons.general.ErrorCode;
+import lombok.NoArgsConstructor;
 
 /**
  * 自定义异常类，异常实例模板
  * 重载构造方法方便使用
  */
+@NoArgsConstructor(force = true)
 public class BusinessException extends RuntimeException {
 
     /**
