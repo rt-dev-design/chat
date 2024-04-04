@@ -80,9 +80,9 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
             }
         }
 
-        if (senderId != null && senderId > 0) {
-            queryWrapper.eq("senderId", senderId);
-        }
+//        if (senderId != null && senderId > 0) {
+//            queryWrapper.eq("senderId", senderId);
+//        }
 
         if (id != null && id > 0) {
             queryWrapper.eq("id", id);
@@ -120,7 +120,8 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 
     @Override
     public Page<Message> page(Page<Message> page, MessageQueryRequest messageQueryRequest) {
-        return this.page(page, this.getMessageQueryWrapperFromRequest(messageQueryRequest));
+        Page<Message> messagePage = this.page(new Page<>(page.getCurrent(), page.getSize()), this.getMessageQueryWrapperFromRequest(messageQueryRequest));
+        return messagePage;
     }
 }
 
