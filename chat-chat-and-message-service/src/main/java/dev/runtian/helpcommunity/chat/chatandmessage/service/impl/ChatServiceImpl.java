@@ -71,14 +71,16 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
     @Override
     public ChatVO getChatVO(Chat chat, User user) {
         QueryWrapper<Message> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("max(createTime)");
         queryWrapper.eq("chatId", chat.getId());
+        queryWrapper.orderByDesc("createTime");
+        queryWrapper.last("LIMIT 1");
         Message message = messageService.getOne(queryWrapper);
+        String lastMessage = message == null ? "" : message.getContent();
         return ChatVO.builder()
                 .id(chat.getId())
                 .theOtherUser(userService.getUserVO(userService.getById(getTheOtherUsersId(user.getId(), chat))))
                 .lastMessageTime(chat.getLastMessageTime())
-                .lastMessage(message.getContent())
+                .lastMessage(lastMessage)
                 .thereAreNewMessages(getUserLastPresentTimeOnChat(user.getId(), chat).before(chat.getLastMessageTime()))
                 .build();
     }
@@ -153,6 +155,7 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
                 .build();
         boolean result = messageService.save(message);
         if (!result) throw new BusinessException(ErrorCode.OPERATION_ERROR, "存储消息失败");
+        message = messageService.getById(message.getId());
         chat.setLastMessageTime(message.getCreateTime());
         setUserPresentTimeOnChat(chat, messageAddRequest.getSenderId());
         result = this.updateById(chat);
