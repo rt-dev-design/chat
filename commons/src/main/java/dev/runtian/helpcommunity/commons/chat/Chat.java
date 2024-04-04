@@ -57,7 +57,7 @@ public class Chat implements Serializable {
     private Long useryId;
 
     /**
-     * 用户x最后活跃时间
+     * 用户x最后出现时间
      */
     private Date usexLastPresentTime;
 

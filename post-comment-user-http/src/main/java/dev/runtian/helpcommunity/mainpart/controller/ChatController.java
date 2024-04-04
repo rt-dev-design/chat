@@ -55,22 +55,16 @@ public class ChatController {
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
         Page<Chat> chatPage = chatService.page(new Page<>(current, size),
-                chatService.getChatQueryWrapperFromRequest(chatQueryRequest));
+                chatQueryRequest);
         User loginUser = userService.getLoginUser(request);
         return ResultUtils.success(chatService.getChatVOPage(chatPage, loginUser));
     }
 
     @PostMapping("/update-last-present-time")
-    public BaseResponse<Integer> updateLastPresentTime(
+    public BaseResponse<Boolean> updateLastPresentTime(
             @RequestBody UpdateLastPresentTimeDTO updateLastPresentTimeDTO,
             HttpServletRequest request
     ) {
-        if (updateLastPresentTimeDTO == null ||
-                updateLastPresentTimeDTO.getId() == null || updateLastPresentTimeDTO.getId() <= 0 ||
-                updateLastPresentTimeDTO.getThisUsersId() == null || updateLastPresentTimeDTO.getThisUsersId() <= 0
-        ) {
-            throw new BusinessException(ErrorCode.PARAMS_ERROR);
-        }
         User user = userService.getLoginUser(request);
         if (!user.getId().equals(updateLastPresentTimeDTO.getThisUsersId())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);

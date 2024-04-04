@@ -18,7 +18,8 @@ public class StompConnectionServiceImpl implements StompConnectionService {
 
     @Override
     public void setUserStompConnection(UserStompConnection userStompConnection) {
-         log.info(userStompConnection.toString());
+         if (userStompConnectionRepository.existsById(userStompConnection.getId().toString()))
+             userStompConnectionRepository.deleteById(userStompConnection.getId().toString());
          userStompConnection.setOnline(true);
          userStompConnectionRepository.save(userStompConnection);
     }
@@ -35,10 +36,11 @@ public class StompConnectionServiceImpl implements StompConnectionService {
 
     @Override
     public void setOffline(Long id) {
-        log.info(id.toString());
-        UserStompConnection userStompConnection = userStompConnectionRepository.findById(id.toString()).get();
-        log.info(userStompConnection.toString());
-        userStompConnection.setOnline(false);
-        userStompConnectionRepository.save(userStompConnection);
+        if (userStompConnectionRepository.existsById(id.toString())) {
+            UserStompConnection userStompConnection = userStompConnectionRepository.findById(id.toString()).get();
+            userStompConnectionRepository.deleteById(id.toString());
+            userStompConnection.setOnline(false);
+            userStompConnectionRepository.save(userStompConnection);
+        }
     }
 }

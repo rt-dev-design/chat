@@ -1,12 +1,10 @@
 package dev.runtian.helpcommunity.chat.stompgateway.controller.chat;
 
-import cn.hutool.core.bean.BeanUtil;
 import dev.runtian.helpcommunity.commons.exception.BusinessException;
 import dev.runtian.helpcommunity.commons.general.ErrorCode;
 import dev.runtian.helpcommunity.commons.general.IdRequest;
 import dev.runtian.helpcommunity.commons.message.MessageAddRequest;
 import dev.runtian.helpcommunity.commons.stompconnection.UserStompConnection;
-import dev.runtian.helpcommunity.commons.test.TestDto;
 import dev.runtian.helpcommunity.innerapi.messaging.MessagingService;
 import dev.runtian.helpcommunity.innerapi.stompconnection.StompConnectionService;
 import dev.runtian.helpcommunity.innerapi.stompgateway.StompGatewayService;

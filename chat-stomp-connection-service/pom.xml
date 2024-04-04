@@ -121,6 +121,7 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <fork>true</fork>
                 </configuration>
             </plugin>
         </plugins>

@@ -1,6 +1,7 @@
 package dev.runtian.helpcommunity.innerapi.chat;
 
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -20,4 +21,6 @@ public interface MessageService extends IService<Message> {
     QueryWrapper<Message> getMessageQueryWrapperFromRequest(MessageQueryRequest messageQueryRequest);
 
     Page<MessageVO> getMessageVOPage(Page<Message> messagePage, User user);
+
+    Page<Message> page(Page<Message> page, MessageQueryRequest messageQueryRequest);
 }

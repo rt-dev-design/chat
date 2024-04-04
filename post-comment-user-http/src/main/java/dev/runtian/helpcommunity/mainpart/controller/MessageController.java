@@ -44,7 +44,7 @@ public class MessageController {
         // 限制爬虫
         ThrowUtils.throwIf(size > 40, ErrorCode.PARAMS_ERROR);
         Page<Message> messagePage = messageService.page(new Page<>(current, size),
-                messageService.getMessageQueryWrapperFromRequest(messageQueryRequest));
+                messageQueryRequest);
         return ResultUtils.success(messageService.getMessageVOPage(messagePage, loginUser));
     }
 }
