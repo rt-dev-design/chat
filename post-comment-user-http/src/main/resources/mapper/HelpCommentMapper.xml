@@ -20,4 +20,10 @@
         thumbNum,userId,createTime,
         updateTime,isDelete
     </sql>
+    <select id="selectDeletedCommentsByPage"
+            resultType="dev.runtian.helpcommunity.commons.helpcommnet.HelpComment">
+        SELECT *
+        FROM help_comment
+        WHERE isDelete = 1
+    </select>
 </mapper>

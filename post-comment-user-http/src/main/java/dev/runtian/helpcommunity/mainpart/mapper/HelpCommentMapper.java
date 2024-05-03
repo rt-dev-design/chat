@@ -1,7 +1,13 @@
 package dev.runtian.helpcommunity.mainpart.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Constants;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import dev.runtian.helpcommunity.commons.helpcommnet.HelpComment;
+import dev.runtian.helpcommunity.commons.post.Post;
+import org.apache.ibatis.annotations.Param;
 
 /**
 * @author rt
@@ -10,7 +16,10 @@ import dev.runtian.helpcommunity.commons.helpcommnet.HelpComment;
 * @Entity dev.runtian.helpcommunity.model.entity.HelpComment
 */
 public interface HelpCommentMapper extends BaseMapper<HelpComment> {
-
+    Page<HelpComment> selectDeletedCommentsByPage(
+            IPage<HelpComment> page,
+            @Param(Constants.WRAPPER) Wrapper<HelpComment> queryWrapper
+    );
 }
 
 

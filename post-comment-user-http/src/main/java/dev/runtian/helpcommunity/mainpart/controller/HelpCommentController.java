@@ -9,12 +9,17 @@ import dev.runtian.helpcommunity.commons.general.DeleteRequest;
 import dev.runtian.helpcommunity.commons.general.ErrorCode;
 import dev.runtian.helpcommunity.commons.general.ResultUtils;
 import dev.runtian.helpcommunity.commons.helpcommnet.*;
+import dev.runtian.helpcommunity.commons.post.Post;
+import dev.runtian.helpcommunity.commons.post.PostQueryRequest;
+import dev.runtian.helpcommunity.commons.post.PostVO;
 import dev.runtian.helpcommunity.commons.user.User;
 import dev.runtian.helpcommunity.innerapi.helpcomment.HelpCommentService;
 import dev.runtian.helpcommunity.innerapi.user.UserService;
 import dev.runtian.helpcommunity.mainpart.annotation.AuthCheck;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -111,6 +116,32 @@ public class HelpCommentController {
         }
         // 3、进行正式的删除操作，并构造响应和返回
         return ResultUtils.success(helpCommentService.deleteHelpCommentAndCommentImagesByHelpCommentId(id));
+    }
+
+    @PostMapping("/delete-logically")
+    public BaseResponse<Boolean> deleteHelpCommentLogically(
+            @RequestBody DeleteRequest deleteRequest,
+            HttpServletRequest request
+    ) {
+        // 1、先做一些一般性的校验
+        // 1）先做一些请求参数和数据的轻校验
+        // 有没有请求体，有的话请求体的值是否合法
+        if (deleteRequest == null || deleteRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        // 2）校验用户是否登录并取到用户
+        User user = userService.getLoginUser(request);
+        // 2、开始有关业务的判断校验：
+        // 1）先判断评论是否存在
+        long id = deleteRequest.getId();
+        HelpComment oldHelpComment = helpCommentService.getById(id);
+        ThrowUtils.throwIf(oldHelpComment == null, ErrorCode.NOT_FOUND_ERROR);
+        // 2）然后确保仅本人或管理员可删除评论
+        if (!oldHelpComment.getUserId().equals(user.getId()) && !userService.isAdmin(request)) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
+        }
+        // 3、进行正式的删除操作，并构造响应和返回
+        return ResultUtils.success(helpCommentService.removeById(id));
     }
 
     /**
@@ -300,4 +331,18 @@ public class HelpCommentController {
         return ResultUtils.success(result);
     }
 
+    @PostMapping("/list/page/deleted/vo")
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public BaseResponse<Page<HelpCommentVO>> listDeletedHelpCommentVOByPage(
+            @RequestBody HelpCommentQueryRequest helpCommentQueryRequest,
+            HttpServletRequest request
+    ) {
+        long current = helpCommentQueryRequest.getCurrent();
+        long size = helpCommentQueryRequest.getPageSize();
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
+        Page<HelpComment> postPage = helpCommentService.selectDeletedCommentByPage(new Page<>(current, size),
+                helpCommentService.getQueryWrapper(helpCommentQueryRequest));
+        return ResultUtils.success(helpCommentService.getHelpCommentVOPage(postPage, request));
+    }
 }

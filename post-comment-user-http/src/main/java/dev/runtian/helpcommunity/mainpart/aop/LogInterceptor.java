@@ -24,7 +24,7 @@ public class LogInterceptor {
     /**
      * 对所有控件方法执行拦截
      */
-    @Around("execution(* com.yupi.springbootinit.controller.*.*(..))")
+    @Around("execution(* dev.runtian.helpcommunity.mainpart.controller.*.*(..))")
     public Object doInterceptor(ProceedingJoinPoint point) throws Throwable {
         // 声明和实例化计时并开始计时
         StopWatch stopWatch = new StopWatch();

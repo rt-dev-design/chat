@@ -1,7 +1,9 @@
 package dev.runtian.helpcommunity.mainpart.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import dev.runtian.helpcommunity.commons.constant.CommonConstant;
@@ -54,6 +56,9 @@ public class HelpCommentServiceImpl
 
     @Resource
     private CosManager cosManager;
+
+    @Resource
+    private HelpCommentMapper helpCommentMapper;
 
     /**
      * 检验评论合法性的通用方法 validHelpComment
@@ -368,7 +373,7 @@ public class HelpCommentServiceImpl
     @Override
     public boolean deleteHelpCommentAndCommentImagesByHelpCommentId(long id) {
         QueryWrapper<CommentImage> qw = new QueryWrapper<>();
-        qw.eq("helpCommentId", id);
+        qw.eq("id", id);
         List<CommentImage> commentImageList = commentImageMapper.selectList(qw);
 
         if (CollUtil.isNotEmpty(commentImageList)) {
@@ -381,6 +386,11 @@ public class HelpCommentServiceImpl
         boolean delCommentRes = this.removeById(id);
         ThrowUtils.throwIf(!delCommentRes, ErrorCode.OPERATION_ERROR, "删除评论失败");
         return true;
+    }
+
+    @Override
+    public Page<HelpComment> selectDeletedCommentByPage(IPage<HelpComment> page, Wrapper<HelpComment> queryWrapper) {
+        return helpCommentMapper.selectDeletedCommentsByPage(page, queryWrapper);
     }
 }
 

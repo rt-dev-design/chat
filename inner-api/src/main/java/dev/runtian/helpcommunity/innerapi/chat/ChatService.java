@@ -8,9 +8,12 @@ import dev.runtian.helpcommunity.commons.chat.Chat;
 import dev.runtian.helpcommunity.commons.chat.ChatQueryRequest;
 import dev.runtian.helpcommunity.commons.chat.ChatVO;
 import dev.runtian.helpcommunity.commons.chat.UpdateLastPresentTimeDTO;
+import dev.runtian.helpcommunity.commons.constant.CommonConstant;
 import dev.runtian.helpcommunity.commons.exception.BusinessException;
 import dev.runtian.helpcommunity.commons.message.MessageAddRequest;
 import dev.runtian.helpcommunity.commons.user.User;
+import dev.runtian.helpcommunity.commons.utils.SqlUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -47,6 +50,9 @@ public interface ChatService extends IService<Chat> {
         Long thisUsersId = chatQueryRequest.getThisUsersId();
         Long theOtherUsersId = chatQueryRequest.getTheOtherUsersId();
 
+        String sortField = chatQueryRequest.getSortField();
+        String sortOrder = chatQueryRequest.getSortOrder();
+
         if (id != null && id > 0) queryWrapper.eq("id", id);
         if (userxLastPresentTime != null) queryWrapper.eq("userxLastPresentTime", userxLastPresentTime);
         if (useryLastPresentTime != null) queryWrapper.eq("useryLastPresentTime", useryLastPresentTime);
@@ -61,6 +67,18 @@ public interface ChatService extends IService<Chat> {
             queryWrapper.and(qw ->
                     qw.eq("userxId", thisUsersId).eq("useryId", theOtherUsersId)
                             .or().eq("userxId", theOtherUsersId).eq("useryId", thisUsersId));
+        }
+
+        if (StringUtils.isAnyBlank(sortField, sortOrder)) {
+            queryWrapper.orderBy(
+                    true,
+                    false,
+                    "lastMessageTime");
+        } else {
+            queryWrapper.orderBy(
+                    SqlUtils.validSortField(sortField),
+                    sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+                    sortField);
         }
         return queryWrapper;
     }

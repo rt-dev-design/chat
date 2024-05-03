@@ -8,10 +8,12 @@ import dev.runtian.helpcommunity.chat.chatandmessage.mapper.ChatMapper;
 import dev.runtian.helpcommunity.chat.chatandmessage.mapper.MessageMapper;
 import dev.runtian.helpcommunity.commons.chat.Chat;
 import dev.runtian.helpcommunity.commons.chat.ChatQueryRequest;
+import dev.runtian.helpcommunity.commons.constant.CommonConstant;
 import dev.runtian.helpcommunity.commons.message.Message;
 import dev.runtian.helpcommunity.commons.message.MessageQueryRequest;
 import dev.runtian.helpcommunity.commons.message.MessageVO;
 import dev.runtian.helpcommunity.commons.user.User;
+import dev.runtian.helpcommunity.commons.utils.SqlUtils;
 import dev.runtian.helpcommunity.innerapi.chat.ChatService;
 import dev.runtian.helpcommunity.innerapi.chat.MessageService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,6 +64,8 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
         Long id = messageQueryRequest.getId();
         String type = messageQueryRequest.getType();
         String content = messageQueryRequest.getContent();
+        String sortField = messageQueryRequest.getSortField();
+        String sortOrder = messageQueryRequest.getSortOrder();
 
         if (beforeTime != null) {
             queryWrapper.lt("createTime", beforeTime);
@@ -80,10 +85,6 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
             }
         }
 
-//        if (senderId != null && senderId > 0) {
-//            queryWrapper.eq("senderId", senderId);
-//        }
-
         if (id != null && id > 0) {
             queryWrapper.eq("id", id);
         }
@@ -94,6 +95,18 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 
         if (StringUtils.isNotBlank(content)) {
             queryWrapper.eq("content", content);
+        }
+        // 默认按消息创建时间降序排序，越近越靠前
+        if (StringUtils.isAnyBlank(sortField, sortOrder)) {
+            queryWrapper.orderBy(
+                    true,
+                    false,
+                    "createTime");
+        } else {
+            queryWrapper.orderBy(
+                    SqlUtils.validSortField(sortField),
+                    sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+                    sortField);
         }
         return queryWrapper;
     }
@@ -120,7 +133,11 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 
     @Override
     public Page<Message> page(Page<Message> page, MessageQueryRequest messageQueryRequest) {
+        // 选完reverser一下，结合上面的默认按消息创建时间降序排序，选出最近的一页消息，给前端prepend
         Page<Message> messagePage = this.page(new Page<>(page.getCurrent(), page.getSize()), this.getMessageQueryWrapperFromRequest(messageQueryRequest));
+        if (StringUtils.isAnyBlank(messageQueryRequest.getSortField(), messageQueryRequest.getSortOrder())) {
+            Collections.reverse(messagePage.getRecords());
+        }
         return messagePage;
     }
 }
