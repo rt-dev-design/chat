@@ -57,6 +57,7 @@ public class ChatController {
         Page<Chat> chatPage = chatService.page(new Page<>(current, size),
                 chatQueryRequest);
         User loginUser = userService.getLoginUser(request);
+        // todo: 使用了2次RPC调用才从服务拿到真正的列表，其中的一次还传了整个列表，需要优化
         return ResultUtils.success(chatService.getChatVOPage(chatPage, loginUser));
     }
 

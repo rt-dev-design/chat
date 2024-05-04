@@ -21,6 +21,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -28,10 +30,12 @@ import java.util.Date;
 import java.util.List;
 
 /**
-* @author rt
-* @description 针对表【chat(对话表)】的数据库操作Service实现
-* @createDate 2024-03-30 16:09:26
-*/
+ * 对话服务实现类ChatServiceImpl，bean
+ * 会被Spring Boot进行AOP代理，开启事务
+ * 会被Dubbo处理，生成RPC服务端
+ * 注入了RPC客户端和其他服务bean
+ * 实现了接口ChatService，继承了MyBatisPlus的ServiceImpl
+ */
 @Service
 @DubboService
 @Slf4j
@@ -44,13 +48,23 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
     @Resource
     private MessageService messageService;
 
+    /**
+     * 检查某用户是否有未读消息
+     * 查询这个用户参与的所有对话，若其中1个存在未读，则为真，否则为假
+     *
+     * this ChatServiceImpl
+     * userId
+     *
+     * true/false
+     *
+     * 或者抛异常
+     */
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public boolean checkIfThereIsUnreadForUser(long userId) throws BusinessException {
+        // id的校验在控件中，这里暂无需再校验
         QueryWrapper<Chat> queryWrapper = new QueryWrapper<>();
-        queryWrapper
-                .eq("userxId", userId)
-                .or()
-                .eq("useryId", userId);
+        queryWrapper.eq("userxId", userId).or().eq("useryId", userId);
         List<Chat> chatList = this.getBaseMapper().selectList(queryWrapper);
         for (Chat chat : chatList) {
             if (getUserLastPresentTimeOnChat(userId, chat).before(chat.getLastMessageTime()))
@@ -59,14 +73,19 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
         return false;
     }
 
+    /**
+     * 给定userId和chat（其中有2个user），返回该user的LastPresentTime
+     */
     public Date getUserLastPresentTimeOnChat(Long userId, Chat chat) {
         return userId.equals(chat.getUserxId()) ? chat.getUsexLastPresentTime() : chat.getUseryLastPresentTime();
     }
 
+    /**
+     * 给定userId和chat（其中有2个user），返回另一userId
+     */
     public Long getTheOtherUsersId(Long userId, Chat chat) {
         return userId.equals(chat.getUserxId()) ? chat.getUseryId() : chat.getUserxId();
     }
-
 
     @Override
     public ChatVO getChatVO(Chat chat, User user) {
@@ -124,14 +143,32 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
         return true;
     }
 
+    /**
+     * 存储消息业务storeMessage
+     * 给定一条消息，
+     * 关联到相应对话，存储到数据库
+     * 存储成功后，再更新对话的最新消息时间和用户的最后出现时间
+     * 开启事务，因为会和查询对话、消息的业务并发
+     *
+     * this ChatServiceImpl
+     * MessageAddRequest
+     *
+     * void
+     *
+     * BusinessException
+     */
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public void storeMessage(MessageAddRequest messageAddRequest) throws BusinessException {
         Long chatId = messageAddRequest.getChatId();
+        // 查询或创建对话
         Chat chat = null;
         if (chatId != null && chatId > 0) {
             chat = this.getById(chatId);
-            if (chat == null) throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "会话不存在");
-        } else {
+            if (chat == null)
+                throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "会话不存在");
+        }
+        else {
             chat = this.getOne(ChatService.getChatQueryWrapperFromRequest(
                     ChatQueryRequest.builder()
                             .thisUsersId(messageAddRequest.getSenderId())
@@ -143,34 +180,46 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
                         .userxId(messageAddRequest.getSenderId())
                         .useryId(messageAddRequest.getRecipientId())
                         .build();
-                if (!this.save(chat)) throw new BusinessException(ErrorCode.OPERATION_ERROR, "创建会话失败");
+                if (!this.save(chat))
+                    throw new BusinessException(ErrorCode.OPERATION_ERROR, "创建会话失败");
             }
         }
 
+        // 关联对话并存储
         Message message = Message.builder()
                 .type(messageAddRequest.getType())
                 .content(messageAddRequest.getContent())
                 .senderId(messageAddRequest.getSenderId())
                 .chatId(chat.getId())
                 .build();
-        boolean result = messageService.save(message);
-        if (!result) throw new BusinessException(ErrorCode.OPERATION_ERROR, "存储消息失败");
+        if (!messageService.save(message))
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "存储消息失败");
+
+        // 更新对话中的时间戳
         message = messageService.getById(message.getId());
+        if (message == null)
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "查询新插入的消息时出错");
         chat.setLastMessageTime(message.getCreateTime());
-        setUserPresentTimeOnChat(chat, messageAddRequest.getSenderId());
-        result = this.updateById(chat);
-        if (!result) throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新最新消息时间失败");
+        setUserLastPresentTimeOnChatToNow(chat, messageAddRequest.getSenderId());
+        if (!this.updateById(chat))
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新最新消息时间或用户最后出现时间失败");
     }
 
+    /**
+     * 分页查询对话
+     * 开启事务，因为会和存储消息的业务并发
+     */
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Page<Chat> page(Page<Chat> page, ChatQueryRequest chatQueryRequest) {
         return this.page(page, ChatService.getChatQueryWrapperFromRequest(chatQueryRequest));
     }
 
-    public void setUserPresentTimeOnChat(Chat chat, Long userId) {
+    public void setUserLastPresentTimeOnChatToNow(Chat chat, Long userId) {
         if (userId.equals(chat.getUserxId())) {
             chat.setUsexLastPresentTime(new Date());
-        } else if (userId.equals(chat.getUseryId())) {
+        }
+        else if (userId.equals(chat.getUseryId())) {
             chat.setUseryLastPresentTime(new Date());
         }
     }
