@@ -260,8 +260,9 @@
   发起请求，添加到messages前面
 - 每次退出或者隐藏页面时，
   - 更新userIsCurrentlyOnPage为others
-  - 清除chatId, 即设置chatId为-1，清空各类缓冲区等等，总之，把message模块里的数据都变回初始化后的状态
   - 更新用户最后活跃时间
+  - 清除chatId, 即设置chatId为-1，清空各类缓冲区等等，总之，把message模块里的数据都变回初始化后的状态
+
 
 - 每次用户发送聊天消息时
   - 前端向/app/chat端点发送Stomp消息，然后将消息直接appendFromStomp到messages的末尾

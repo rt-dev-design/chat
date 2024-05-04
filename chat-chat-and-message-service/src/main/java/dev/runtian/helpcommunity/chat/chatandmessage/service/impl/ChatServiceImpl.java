@@ -118,12 +118,15 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
     }
 
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Boolean updateLastPresentTime(UpdateLastPresentTimeDTO updateLastPresentTimeDTO, User user) throws BusinessException {
         Long id = updateLastPresentTimeDTO.getId();
         Long thisUsersId = updateLastPresentTimeDTO.getThisUsersId();
         Long theOtherUsersId = updateLastPresentTimeDTO.getTheOtherUsersId();
         Chat chat = null;
-        if (id != null && id > 0) chat = this.getById(id);
+        if (id != null && id > 0) {
+            chat = this.getById(id);
+        }
         else {
             chat = this.getBaseMapper().selectOne(ChatService.getChatQueryWrapperFromRequest(
                     ChatQueryRequest.builder()
@@ -132,14 +135,11 @@ public class ChatServiceImpl extends ServiceImpl<ChatMapper, Chat>
                             .build()
             ));
         }
-        if (chat == null) throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "对话暂不存在，无需更新最后出现时间");
-        if (chat.getUserxId().equals(user.getId())) {
-            chat.setUsexLastPresentTime(new Date());
-        } else if (chat.getUseryId().equals(user.getId())) {
-            chat.setUseryLastPresentTime(new Date());
-        }
-        boolean result = this.updateById(chat);
-        if (!result) throw new BusinessException(ErrorCode.OPERATION_ERROR);
+        if (chat == null)
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR, "对话暂不存在，无需更新最后出现时间");
+        setUserLastPresentTimeOnChatToNow(chat, user.getId());
+        if (!this.updateById(chat))
+            throw new BusinessException(ErrorCode.OPERATION_ERROR, "更新用户最后出现时间失败");
         return true;
     }
 
