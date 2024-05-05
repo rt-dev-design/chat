@@ -1,0 +1,16 @@
+{
+  "name": "campus-mutual-help-community",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "json-bigint": "^1.0.0",
+    "lodash": "^4.17.21",
+    "uview-ui": "^1.8.4"
+  }
+}
