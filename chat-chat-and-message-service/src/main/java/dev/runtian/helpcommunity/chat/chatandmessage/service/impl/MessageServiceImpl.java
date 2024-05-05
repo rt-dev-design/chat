@@ -73,7 +73,8 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
 
         if (chatId != null && chatId > 0) {
             queryWrapper.eq("chatId", chatId);
-        } else if (recipientId != null && recipientId > 0) {
+        }
+        else if (recipientId != null && recipientId > 0) {
             if (senderId != null && senderId > 0) {
                 Chat chat = chatMapper.selectOne(ChatService.getChatQueryWrapperFromRequest(
                         ChatQueryRequest.builder()
@@ -81,7 +82,10 @@ public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
                                 .theOtherUsersId(recipientId)
                                 .build()
                 ));
-                if (chat != null) queryWrapper.eq("chatId", chat.getId());
+                if (chat != null)
+                    queryWrapper.eq("chatId", chat.getId());
+                else
+                    queryWrapper.eq("chatId", -1);
             }
         }
 
